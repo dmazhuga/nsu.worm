@@ -7,7 +7,7 @@ namespace NSU.Worm
 {
     public class Simulator
     {
-        private List<Worm> _worms;
+        private readonly List<Worm> _worms;
 
         private long _iteration;
 
@@ -52,31 +52,8 @@ namespace NSU.Worm
 
         private void MoveWorm(Worm worm, Direction direction)
         {
-            Position newPosition;
-            
-            switch (direction)
-            {
-                case Direction.Left:
-                    newPosition = worm.Position.NextLeft();
-                    break;
-                case Direction.Right:
-                    newPosition = worm.Position.NextRight();
-                    break;
-                case Direction.Down:
-                    newPosition = worm.Position.NextDown();
-                    break;
-                case Direction.Up:
-                    newPosition = worm.Position.NextUp();
-                    break; 
-                default:
-                    throw new ArgumentException($"Unsupported direction argument: {direction}");
-            }
-            
-            MoveWorm(worm, newPosition);
-        }
+            var newPosition = worm.Position.Next(direction);
 
-        private void MoveWorm(Worm worm, Position newPosition)
-        {
             if (_worms.Any(otherWorm => otherWorm != worm && otherWorm.Position == newPosition))
             {
                 return;
@@ -105,7 +82,7 @@ namespace NSU.Worm
             {
                 stringBuilder.Remove(stringBuilder.Length - 2, 2);
             }
-            
+
             stringBuilder.Append(']');
 
             Console.WriteLine(stringBuilder.ToString());

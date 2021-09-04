@@ -7,9 +7,8 @@ namespace NSU.Worm
         static void Main(string[] args)
         {
             var worms = new List<Worm>();
-            worms.Add(new Worm("Sasha", 0, 0));
-            worms.Add(new Worm("Zhenya", 0, 1));
-            
+            worms.Add(new CirclingWorm("Sasha", 0, 0));
+
             var simulator = new Simulator(worms);
             simulator.Start();
         }

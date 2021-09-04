@@ -1,6 +1,6 @@
 ﻿namespace NSU.Worm
 {
-    public class Worm
+    public abstract class Worm
     {
         public Worm(string name, int xPosition, int yPosition)
         {
@@ -12,12 +12,7 @@
         
         public Position Position { get; set; }
 
-        private WormAction _lastMove;
-
-        public WormAction GetAction()
-        {
-            return WormAction.MoveUp;
-        }
+        public abstract WormAction GetAction();
 
         public override string ToString()
         {
