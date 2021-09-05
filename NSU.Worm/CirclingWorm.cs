@@ -5,7 +5,7 @@ namespace NSU.Worm
     /// <summary>
     /// Червь, который кружится вокруг точки, в которой изначально появился.
     /// </summary>
-    public class CirclingWorm : Worm
+    public class CirclingWorm : AbstractWorm
     {
         public CirclingWorm(string name, int xPosition, int yPosition) : base(name, xPosition, yPosition)
         {

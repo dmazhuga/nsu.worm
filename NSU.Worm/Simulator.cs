@@ -64,7 +64,7 @@ namespace NSU.Worm
 
         private void PrintState()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
 
             if (_iteration == 0)
             {
