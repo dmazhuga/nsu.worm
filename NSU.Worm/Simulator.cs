@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace NSU.Worm
 {
     public class Simulator
     {
-        private readonly List<Worm> _worms;
+        private readonly WorldState _worldState;
 
         private long _iteration;
 
         public Simulator(List<Worm> worms)
         {
-            _worms = worms;
+            _worldState = new ArrayCacheWorldState(worms);
 
             _iteration = 0;
         }
 
-        public void Start()
+        public void Start(int iterations)
         {
             PrintState();
 
-            while (_iteration < 10)
+            while (_iteration < iterations)
             {
                 Iteration();
                 PrintState();
@@ -31,7 +30,7 @@ namespace NSU.Worm
 
         private void Iteration()
         {
-            foreach (var worm in _worms)
+            foreach (var worm in _worldState.Worms)
             {
                 var action = worm.GetAction();
 
@@ -54,12 +53,10 @@ namespace NSU.Worm
         {
             var newPosition = worm.Position.Next(direction);
 
-            if (_worms.Any(otherWorm => otherWorm != worm && otherWorm.Position == newPosition))
+            if (_worldState.Get(newPosition) != WorldState.Tile.Worm)
             {
-                return;
+                _worldState.Move(worm, newPosition);
             }
-
-            worm.Position = newPosition;
         }
 
         private void PrintState()
@@ -68,24 +65,13 @@ namespace NSU.Worm
 
             if (_iteration == 0)
             {
-                stringBuilder.Append("Worm Simulator started!\n");
+                stringBuilder.AppendLine("Worm Simulator started!");
             }
 
-            stringBuilder.Append($"Iteration: {_iteration}\tWorms: [");
+            stringBuilder.Append($"Iteration: {_iteration}\t");
+            stringBuilder.AppendLine(_worldState.StateToString());
 
-            foreach (var worm in _worms)
-            {
-                stringBuilder.Append($"{worm}, ");
-            }
-
-            if (_worms.Count != 0)
-            {
-                stringBuilder.Remove(stringBuilder.Length - 2, 2);
-            }
-
-            stringBuilder.Append(']');
-
-            Console.WriteLine(stringBuilder.ToString());
+            Console.Write(stringBuilder.ToString());
         }
     }
 }
