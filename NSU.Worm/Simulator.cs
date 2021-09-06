@@ -32,6 +32,14 @@ namespace NSU.Worm
         {
             foreach (var worm in _worldState.Worms)
             {
+                worm.Life--;
+
+                if (worm.Life <= 0)
+                {
+                    _worldState.Remove(worm);
+                    continue;
+                }
+
                 var action = worm.GetAction();
 
                 switch (action.Type)

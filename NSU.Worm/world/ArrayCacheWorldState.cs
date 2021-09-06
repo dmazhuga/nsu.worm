@@ -46,6 +46,16 @@ namespace NSU.Worm
             }
         }
 
+        public override void Remove(Worm worm)
+        {
+            base.Remove(worm);
+
+            if (InBorders(worm.Position))
+            {
+                _map[ConvertX(worm.Position.X), ConvertY(worm.Position.Y)] = (byte) WorldState.Tile.Empty;
+            }
+        }
+
         public override WorldState.Tile Get(Position position)
         {
             if (InBorders(position))

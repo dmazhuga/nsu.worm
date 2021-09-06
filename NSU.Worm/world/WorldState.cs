@@ -10,6 +10,8 @@ namespace NSU.Worm
 
         public void Put(Worm worm, Position position);
 
+        public void Remove(Worm worm);
+
         public Tile Get(Position position);
 
         public string StateToString();

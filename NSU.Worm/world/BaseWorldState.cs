@@ -56,6 +56,17 @@ namespace NSU.Worm
             _worms.Add(worm);
         }
 
+        public virtual void Remove(Worm worm)
+        {
+            if (!Exists(worm))
+            {
+                throw new ArgumentException(
+                    "No such worm in current world state");
+            }
+
+            _worms.Remove(worm);
+        }
+
         public virtual WorldState.Tile Get(Position position)
         {
             return _worms.Any(worm => worm.Position == position) ? WorldState.Tile.Worm : WorldState.Tile.Empty;
