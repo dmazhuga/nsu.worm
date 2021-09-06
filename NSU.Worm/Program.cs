@@ -5,12 +5,12 @@ namespace NSU.Worm
     class Program
     {
         private const int Iterations = 10;
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var worms = new List<Worm>
             {
-                new CirclingWorm("Sasha", 10, 0),
-                new CirclingWorm("Zhenya", 10, 1)
+                new Worm("Sasha", 10, 0, new CirclingWormAI(10, 0)),
+                new Worm("Zhenya", 10, 1, new CirclingWormAI(10, 1))
             };
 
             var simulator = new Simulator(worms);
