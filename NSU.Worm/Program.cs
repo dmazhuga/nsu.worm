@@ -9,8 +9,8 @@ namespace NSU.Worm
         {
             var worms = new List<Worm>
             {
-                new Worm("Sasha", 10, 10, 0, new CirclingWormAI(10, 0)),
-                new Worm("Zhenya", 5, 10, 1, new CirclingWormAI(10, 1))
+                new Worm("Sasha", 10, 2, 0, new CirclingWormAI(2, 0)),
+                new Worm("Zhenya", 10, -2, 0, new CirclingWormAI(-2, 0))
             };
 
             var simulator = new Simulator(worms);

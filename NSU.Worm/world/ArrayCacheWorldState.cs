@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace NSU.Worm
@@ -55,6 +56,16 @@ namespace NSU.Worm
                 _map[ConvertX(worm.Position.X), ConvertY(worm.Position.Y)] = (byte) WorldState.Tile.Empty;
             }
         }
+        
+        public override void Put(Food food, Position position)
+        {
+            throw new NotImplementedException();    //TODO: what if worm and food occupy same tile?
+        }
+
+        public override void RemoveFood(Position position)
+        {
+            throw new NotImplementedException();    //TODO: what if worm and food occupy same tile?
+        }
 
         public override WorldState.Tile Get(Position position)
         {
@@ -64,6 +75,21 @@ namespace NSU.Worm
             }
 
             return base.Get(position);
+        }
+        
+        public override bool IsWorm(Position position)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool IsFood(Position position)
+        {
+            throw new NotImplementedException();
+        }
+        
+        public override bool IsEmpty(Position position)
+        {
+            throw new NotImplementedException();
         }
 
         private bool InBorders(Position position)

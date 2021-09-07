@@ -8,11 +8,14 @@ namespace NSU.Worm
     {
         private readonly WorldState _worldState;
 
+        private readonly FoodGenerator _foodGenerator;
+
         private long _iteration;
 
         public Simulator(List<Worm> worms)
         {
-            _worldState = new ArrayCacheWorldState(worms);
+            _worldState = new BaseWorldState(worms);
+            _foodGenerator = new FoodGenerator();
 
             _iteration = 0;
         }
@@ -30,8 +33,22 @@ namespace NSU.Worm
 
         private void Iteration()
         {
+            var newFood = _foodGenerator.GenerateFood();
+
+            while (_worldState.IsFood(newFood.Position))
+            {
+                newFood = _foodGenerator.GenerateFood();
+            }
+
+            _worldState.Put(newFood, newFood.Position);
+
             foreach (var worm in _worldState.Worms)
             {
+                if (_worldState.IsFood(worm.Position))
+                {
+                    MakeWormEat(worm);
+                }
+
                 worm.Life--;
 
                 if (worm.Life <= 0)
@@ -52,6 +69,11 @@ namespace NSU.Worm
                     default:
                         throw new ArgumentException($"Unsupported action type: {action.Type}");
                 }
+                
+                if (_worldState.IsFood(worm.Position))
+                {
+                    MakeWormEat(worm);
+                }
             }
 
             _iteration++;
@@ -61,10 +83,16 @@ namespace NSU.Worm
         {
             var newPosition = worm.Position.Next(direction);
 
-            if (_worldState.Get(newPosition) != WorldState.Tile.Worm)
+            if (!_worldState.IsWorm(newPosition))
             {
                 _worldState.Move(worm, newPosition);
             }
+        }
+
+        private void MakeWormEat(Worm worm)
+        {
+            _worldState.RemoveFood(worm.Position);
+            worm.Life += 10;
         }
 
         private void PrintState()
