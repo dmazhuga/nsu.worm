@@ -33,6 +33,16 @@ namespace NSU.Worm
 
         private void Iteration()
         {
+            foreach (var food in _worldState.Food)
+            {
+                food.Freshness--;
+
+                if (food.Freshness <= 0)
+                {
+                    _worldState.RemoveFood(food.Position);
+                }
+            }
+
             var newFood = _foodGenerator.GenerateFood();
 
             while (_worldState.IsFood(newFood.Position))
@@ -69,7 +79,7 @@ namespace NSU.Worm
                     default:
                         throw new ArgumentException($"Unsupported action type: {action.Type}");
                 }
-                
+
                 if (_worldState.IsFood(worm.Position))
                 {
                     MakeWormEat(worm);
