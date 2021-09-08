@@ -19,9 +19,28 @@ namespace NSU.Worm
             _circleCenter = new Position(circleCenterX, circleCenterY);
         }
 
-        public WormAction GetNextAction(Position position)
+        public WormAction GetNextAction(Position position, int life)
         {
             var circleRelativePosition = position.DirectionRelativeTo(_circleCenter);
+
+            if (life >= 15)
+            {
+                return circleRelativePosition switch
+                {
+                    Direction.None => WormAction.ReproduceUp,
+                    Direction.Up => WormAction.ReproduceUp,
+                    Direction.UpRight => WormAction.ReproduceUp,
+                    Direction.Right => WormAction.ReproduceRight,
+                    Direction.DownRight => WormAction.ReproduceRight,
+                    Direction.Down => WormAction.ReproduceDown,
+                    Direction.DownLeft => WormAction.ReproduceDown,
+                    Direction.Left => WormAction.ReproduceLeft,
+                    Direction.UpLeft => WormAction.ReproduceLeft,
+                    
+                    _ => throw new InvalidEnumArgumentException(
+                        $"Unsupported circle position: {circleRelativePosition}")
+                };
+            } 
 
             return circleRelativePosition switch
             {

@@ -3,6 +3,15 @@
     public class Worm
     {
         private readonly WormAI _ai;
+        
+        public Worm(string name, int life, Position position, WormAI ai)
+        {
+            Name = name;
+            Life = life;
+            Position = position;
+
+            _ai = ai;
+        }
 
         public Worm(string name, int life, int xPosition, int yPosition, WormAI ai)
         {
@@ -21,7 +30,12 @@
 
         public WormAction GetAction()
         {
-            return _ai.GetNextAction(Position);
+            return _ai.GetNextAction(Position, Life);
+        }
+
+        public Worm Reproduce(string childName, Position position, int childLife)
+        {
+            return new Worm(childName, childLife, position, _ai);
         }
 
         public override string ToString()

@@ -2,6 +2,6 @@
 {
     public interface WormAI
     {
-        public WormAction GetNextAction(Position position);
+        public WormAction GetNextAction(Position position, int life);
     }
 }

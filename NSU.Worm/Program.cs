@@ -4,7 +4,7 @@ namespace NSU.Worm
 {
     class Program
     {
-        private const int Iterations = 10;
+        private const int Iterations = 100;
         public static void Main(string[] args)
         {
             var worms = new List<Worm>

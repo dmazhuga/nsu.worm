@@ -74,6 +74,9 @@ namespace NSU.Worm
                     case WormAction.ActionType.Move:
                         MoveWorm(worm, action.Direction);
                         break;
+                    case WormAction.ActionType.Reproduce:
+                        ReproduceWorm(worm, action.Direction);
+                        break;
                     case WormAction.ActionType.DoNothing:
                         break;
                     default:
@@ -103,6 +106,21 @@ namespace NSU.Worm
         {
             _worldState.RemoveFood(worm.Position);
             worm.Life += 10;
+        }
+
+        private void ReproduceWorm(Worm worm, Direction direction)
+        {
+            var childPosition = worm.Position.Next(direction);
+
+            if (worm.Life <= 10 || _worldState.IsWorm(childPosition) || _worldState.IsFood(childPosition))
+            {
+                return;
+            }
+
+            worm.Life -= 10;
+            var childWorm = worm.Reproduce(worm.Name + "Child", childPosition, 10);     //TODO: name generation
+            
+            _worldState.Put(childWorm, childPosition);
         }
 
         private void PrintState()
