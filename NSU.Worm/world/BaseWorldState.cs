@@ -89,11 +89,9 @@ namespace NSU.Worm
             _food.Add(food);
         }
 
-        public virtual void RemoveFood(Position position)
+        public virtual void Remove(Food food)
         {
-            var food = _food.Find(food => food.Position == position);
-            
-            if (food is null)
+            if (!Exists(food))
             {
                 throw new ArgumentException(
                     "No such food in current world state");
@@ -117,19 +115,14 @@ namespace NSU.Worm
             return WorldState.Tile.Empty;
         }
 
-        public virtual bool IsWorm(Position position)
+        public virtual Worm GetWorm(Position position)
         {
-            return _worms.Any(worm => worm.Position == position);
+            return _worms.Find(worm => worm.Position == position);
         }
 
-        public virtual bool IsFood(Position position)
+        public virtual Food GetFood(Position position)
         {
-            return _food.Any(food => food.Position == position);
-        }
-
-        public virtual bool IsEmpty(Position position)
-        {
-            return IsWorm(position) || IsFood(position);
+            return _food.Find(food => food.Position == position);
         }
 
         public virtual string StateToString()
@@ -175,6 +168,11 @@ namespace NSU.Worm
         protected bool Exists(Worm worm)
         {
             return _worms.Contains(worm);
+        }
+
+        protected bool Exists(Food food)
+        {
+            return _food.Contains(food);
         }
     }
 }

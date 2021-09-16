@@ -39,26 +39,28 @@ namespace NSU.Worm
 
                 if (food.Freshness <= 0)
                 {
-                    _worldState.RemoveFood(food.Position);
+                    _worldState.Remove(food);
                 }
             }
 
             var newFood = _foodGenerator.GenerateFood();
 
-            while (_worldState.IsFood(newFood.Position))
+            while (_worldState.Get(newFood.Position) == WorldState.Tile.Food)
             {
                 newFood = _foodGenerator.GenerateFood();
             }
 
-            _worldState.Put(newFood, newFood.Position);
+            if (_worldState.Get(newFood.Position) == WorldState.Tile.Worm)
+            {
+                 _worldState.GetWorm(newFood.Position).Life += 10;
+            }
+            else
+            {
+                _worldState.Put(newFood, newFood.Position);
+            }
 
             foreach (var worm in _worldState.Worms)
             {
-                if (_worldState.IsFood(worm.Position))
-                {
-                    MakeWormEat(worm);
-                }
-
                 worm.Life--;
 
                 if (worm.Life <= 0)
@@ -82,11 +84,6 @@ namespace NSU.Worm
                     default:
                         throw new ArgumentException($"Unsupported action type: {action.Type}");
                 }
-
-                if (_worldState.IsFood(worm.Position))
-                {
-                    MakeWormEat(worm);
-                }
             }
 
             _iteration++;
@@ -95,30 +92,30 @@ namespace NSU.Worm
         private void MoveWorm(Worm worm, Direction direction)
         {
             var newPosition = worm.Position.Next(direction);
+            
+            if (_worldState.Get(newPosition) == WorldState.Tile.Food)
+            {
+                _worldState.Remove(_worldState.GetFood(newPosition));
+                worm.Life += 10;
+            }
 
-            if (!_worldState.IsWorm(newPosition))
+            if (_worldState.Get(newPosition) != WorldState.Tile.Worm)
             {
                 _worldState.Move(worm, newPosition);
             }
-        }
-
-        private void MakeWormEat(Worm worm)
-        {
-            _worldState.RemoveFood(worm.Position);
-            worm.Life += 10;
         }
 
         private void ReproduceWorm(Worm worm, Direction direction)
         {
             var childPosition = worm.Position.Next(direction);
 
-            if (worm.Life <= 10 || _worldState.IsWorm(childPosition) || _worldState.IsFood(childPosition))
+            if (worm.Life <= 10 || _worldState.Get(childPosition) != WorldState.Tile.Empty)
             {
                 return;
             }
 
             worm.Life -= 10;
-            var childWorm = worm.Reproduce(worm.Name + "Child", childPosition, 10);     //TODO: name generation
+            var childWorm = worm.Reproduce(worm.Name + "Jr", childPosition, 10);     //TODO: name generation
             
             _worldState.Put(childWorm, childPosition);
         }

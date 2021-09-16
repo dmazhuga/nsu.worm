@@ -59,12 +59,22 @@ namespace NSU.Worm
         
         public override void Put(Food food, Position position)
         {
-            throw new NotImplementedException();    //TODO: what if worm and food occupy same tile?
-        }
+            base.Put(food, position);
 
-        public override void RemoveFood(Position position)
+            if (InBorders(position))
+            {
+                _map[ConvertX(position.X), ConvertY(position.Y)] = (byte) WorldState.Tile.Food;
+            }
+        }
+        
+        public override void Remove(Food food)
         {
-            throw new NotImplementedException();    //TODO: what if worm and food occupy same tile?
+            base.Remove(food);
+
+            if (InBorders(food.Position))
+            {
+                _map[ConvertX(food.Position.X), ConvertY(food.Position.Y)] = (byte) WorldState.Tile.Empty;
+            }
         }
 
         public override WorldState.Tile Get(Position position)
@@ -75,21 +85,6 @@ namespace NSU.Worm
             }
 
             return base.Get(position);
-        }
-        
-        public override bool IsWorm(Position position)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsFood(Position position)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public override bool IsEmpty(Position position)
-        {
-            throw new NotImplementedException();
         }
 
         private bool InBorders(Position position)
