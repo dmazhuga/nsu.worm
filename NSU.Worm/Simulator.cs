@@ -10,12 +10,15 @@ namespace NSU.Worm
 
         private readonly FoodGenerator _foodGenerator;
 
+        private readonly NameGenerator _nameGenerator;
+
         private long _iteration;
 
         public Simulator(List<Worm> worms)
         {
             _worldState = new BaseWorldState(worms);
             _foodGenerator = new FoodGenerator();
+            _nameGenerator = new NameGenerator();
 
             _iteration = 0;
         }
@@ -115,7 +118,7 @@ namespace NSU.Worm
             }
 
             worm.Life -= 10;
-            var childWorm = worm.Reproduce(worm.Name + "Jr", childPosition, 10);     //TODO: name generation
+            var childWorm = worm.Reproduce(_nameGenerator.NextName(), childPosition, 10);
             
             _worldState.Put(childWorm, childPosition);
         }
