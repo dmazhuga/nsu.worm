@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace NSU.Worm
@@ -12,6 +13,8 @@ namespace NSU.Worm
 
         private readonly NameGenerator _nameGenerator;
 
+        private readonly Logger _logger;
+
         private long _iteration;
 
         public Simulator(List<Worm> worms)
@@ -19,18 +22,19 @@ namespace NSU.Worm
             _worldState = new BaseWorldState(worms);
             _foodGenerator = new FoodGenerator();
             _nameGenerator = new NameGenerator();
+            _logger = new Logger(true, true);
 
             _iteration = 0;
         }
 
         public void Start(int iterations)
         {
-            PrintState();
+            LogState();
 
             while (_iteration < iterations)
             {
                 Iteration();
-                PrintState();
+                LogState();
             }
         }
 
@@ -55,7 +59,7 @@ namespace NSU.Worm
 
             if (_worldState.Get(newFood.Position) == WorldState.Tile.Worm)
             {
-                 _worldState.GetWorm(newFood.Position).Life += 10;
+                _worldState.GetWorm(newFood.Position).Life += 10;
             }
             else
             {
@@ -95,7 +99,7 @@ namespace NSU.Worm
         private void MoveWorm(Worm worm, Direction direction)
         {
             var newPosition = worm.Position.Next(direction);
-            
+
             if (_worldState.Get(newPosition) == WorldState.Tile.Food)
             {
                 _worldState.Remove(_worldState.GetFood(newPosition));
@@ -119,13 +123,13 @@ namespace NSU.Worm
 
             worm.Life -= 10;
             var childWorm = worm.Reproduce(_nameGenerator.NextName(), childPosition, 10);
-            
+
             _worldState.Put(childWorm, childPosition);
         }
 
-        private void PrintState()
+        private void LogState()
         {
-            var stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 
             if (_iteration == 0)
             {
@@ -135,7 +139,7 @@ namespace NSU.Worm
             stringBuilder.Append($"Iteration: {_iteration}\t");
             stringBuilder.AppendLine(_worldState.StateToString());
 
-            Console.Write(stringBuilder.ToString());
+            _logger.log(stringBuilder.ToString());
         }
     }
 }
