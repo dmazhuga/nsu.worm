@@ -1,26 +1,41 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace NSU.Worm
 {
     /// <summary>
     /// Червь кружится вокруг указанной точки. Если находится не в ней и не в её радиусе, ничего не делает.
     /// </summary>
-    public class CirclingWormAI : WormAI
+    public class CirclingWormBehaviour : IWormBehaviour
     {
         private readonly Position _circleCenter;
 
-        public CirclingWormAI(Position circleCenter)
+        public CirclingWormBehaviour(Worm worm, Position circleCenter)
         {
+            WormName = worm.Name;
             _circleCenter = circleCenter;
         }
 
-        public CirclingWormAI(int circleCenterX, int circleCenterY)
+        public CirclingWormBehaviour(Worm worm, int circleCenterX, int circleCenterY)
         {
+            WormName = worm.Name;
             _circleCenter = new Position(circleCenterX, circleCenterY);
         }
 
-        public WormAction GetNextAction(Position position, int life)
+        public string WormName { get; }
+
+        public WormAction GetAction(IWorldState worldState)
         {
+            var worm = worldState.GetWorm(WormName);
+
+            if (worm is null)
+            {
+                throw new ArgumentException($"Provided state has no worm for name {WormName}");
+            }
+            
+            var position = worm.Position;
+            var life = worm.Life;
+            
             var circleRelativePosition = position.DirectionRelativeTo(_circleCenter);
 
             if (life >= 15)
@@ -56,6 +71,11 @@ namespace NSU.Worm
 
                 _ => throw new InvalidEnumArgumentException($"Unsupported circle position: {circleRelativePosition}")
             };
+        }
+
+        public IWormBehaviour CopyForWorm(Worm worm)
+        {
+            return new CirclingWormBehaviour(worm, worm.Position);
         }
     }
 }

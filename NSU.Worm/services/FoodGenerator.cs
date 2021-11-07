@@ -2,7 +2,7 @@
 
 namespace NSU.Worm
 {
-    public class FoodGenerator
+    public class FoodGenerator : IFoodGenerator
     {
         private Random _random;
 

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace NSU.Worm
 {
     public class Simulator
     {
-        private readonly WorldState _worldState;
+        private readonly IMutableWorldState _worldState;
+
+        private readonly WormBehaviourProvider _wormBehaviourProvider;
 
         private readonly FoodGenerator _foodGenerator;
 
@@ -17,13 +18,19 @@ namespace NSU.Worm
 
         private long _iteration;
 
-        public Simulator(List<Worm> worms)
+        public Simulator(List<KeyValuePair<Worm, IWormBehaviour>> worms)
         {
-            _worldState = new BaseWorldState(worms);
+            _worldState = new WorldState();
+            _wormBehaviourProvider = new WormBehaviourProvider();
             _foodGenerator = new FoodGenerator();
             _nameGenerator = new NameGenerator();
             _logger = new Logger(true, true);
 
+            foreach (var (worm, behaviour) in worms)
+            {
+                AddWorm(worm, behaviour);
+            }
+            
             _iteration = 0;
         }
 
@@ -52,12 +59,12 @@ namespace NSU.Worm
 
             var newFood = _foodGenerator.GenerateFood();
 
-            while (_worldState.Get(newFood.Position) == WorldState.Tile.Food)
+            while (_worldState.Get(newFood.Position) == Tile.Food)
             {
                 newFood = _foodGenerator.GenerateFood();
             }
 
-            if (_worldState.Get(newFood.Position) == WorldState.Tile.Worm)
+            if (_worldState.Get(newFood.Position) == Tile.Worm)
             {
                 _worldState.GetWorm(newFood.Position).Life += 10;
             }
@@ -76,7 +83,8 @@ namespace NSU.Worm
                     continue;
                 }
 
-                var action = worm.GetAction();
+                var behaviour = _wormBehaviourProvider.GetBehaviour(worm);
+                var action = behaviour.GetAction(_worldState);
 
                 switch (action.Type)
                 {
@@ -100,13 +108,13 @@ namespace NSU.Worm
         {
             var newPosition = worm.Position.Next(direction);
 
-            if (_worldState.Get(newPosition) == WorldState.Tile.Food)
+            if (_worldState.Get(newPosition) == Tile.Food)
             {
                 _worldState.Remove(_worldState.GetFood(newPosition));
                 worm.Life += 10;
             }
 
-            if (_worldState.Get(newPosition) != WorldState.Tile.Worm)
+            if (_worldState.Get(newPosition) != Tile.Worm)
             {
                 _worldState.Move(worm, newPosition);
             }
@@ -116,15 +124,23 @@ namespace NSU.Worm
         {
             var childPosition = worm.Position.Next(direction);
 
-            if (worm.Life <= 10 || _worldState.Get(childPosition) != WorldState.Tile.Empty)
+            if (worm.Life <= 10 || _worldState.Get(childPosition) != Tile.Empty)
             {
                 return;
             }
 
             worm.Life -= 10;
-            var childWorm = worm.Reproduce(_nameGenerator.NextName(), childPosition, 10);
+            
+            var childWorm = new Worm(_nameGenerator.NextName(), 10, childPosition);
+            var childBehaviour = _wormBehaviourProvider.GetBehaviour(worm).CopyForWorm(childWorm);
 
-            _worldState.Put(childWorm, childPosition);
+            AddWorm(childWorm, childBehaviour);
+        }
+        
+        private void AddWorm(Worm worm, IWormBehaviour behaviour)
+        {
+            _wormBehaviourProvider.RegisterBehaviour(worm, behaviour);
+            _worldState.Put(worm, worm.Position);
         }
 
         private void LogState()

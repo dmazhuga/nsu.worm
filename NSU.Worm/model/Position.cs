@@ -65,6 +65,10 @@ namespace NSU.Worm
             return (X == target.X) && (Y == target.Y);
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
 
         public static bool operator ==(Position p1, Position p2)
         {

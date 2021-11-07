@@ -1,39 +1,170 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace NSU.Worm
 {
-    public interface WorldState
+    public class WorldState : IMutableWorldState
     {
-        public ImmutableList<Worm> Worms { get; }
+        private readonly List<Worm> _worms;
 
-        public ImmutableList<Food> Food { get; }
-        
-        public Tile Get(Position position);
+        private readonly List<Food> _food;
 
-        public Worm GetWorm(Position position);
-
-        public Food GetFood(Position position);
-
-        public void Move(Worm worm, Position position);
-
-        public void Put(Worm worm, Position position);
-
-        public void Remove(Worm worm);
-
-        public void Put(Food food, Position position);
-        
-        public void Remove(Food food);
-
-        public string StateToString();
-
-        public string MapToString(int leftBorder = -5, int rightBorder = 5, int topBorder = 5, int bottomBorder = -5);
-
-        public enum Tile : byte
+        public WorldState()
         {
-            Empty = 0,
-            Worm = 1,
-            Food = 2
+            _worms = new List<Worm>();
+            _food = new List<Food>();
+        }
+
+        public WorldState(List<Worm> wormList)
+        {
+            _worms = new List<Worm>();
+            _food = new List<Food>();
+
+            foreach (var worm in wormList)
+            {
+                Put(worm, worm.Position);
+            }
+        }
+
+        public WorldState(List<Worm> wormList, List<Food> foodList)
+        {
+            _worms = new List<Worm>();
+            _food = new List<Food>();
+
+            foreach (var worm in wormList)
+            {
+                Put(worm, worm.Position);
+            }
+
+            foreach (var food in foodList)
+            {
+                Put(food, food.Position);
+            }
+        }
+
+        public ImmutableList<Worm> Worms => _worms.ToImmutableList();
+
+        public ImmutableList<Food> Food => _food.ToImmutableList();
+
+        public virtual void Move(Worm worm, Position position)
+        {
+            if (!Exists(worm))
+            {
+                throw new ArgumentException(
+                    "No such worm in current world state");
+            }
+
+            if (Get(position) == Tile.Worm)
+            {
+                throw new ArgumentException(
+                    $"Cannot move worm to position {position} - it is used by other worm");
+            }
+
+            worm.Position = position;
+        }
+
+        public virtual void Put(Worm worm, Position position)
+        {
+            if (Exists(worm))
+            {
+                throw new ArgumentException(
+                    "This worm already exists in current world state");
+            }
+
+            if (GetWorm(worm.Name) is not null)
+            {
+                throw new ArgumentException(
+                    $"Worm with name {worm.Name} already exists. Name should be unique.");
+            }
+
+            if (Get(position) != Tile.Empty)
+            {
+                throw new ArgumentException(
+                    $"Cannot put worm to position {position} - it is not empty");
+            }
+
+            _worms.Add(worm);
+        }
+
+        public virtual void Remove(Worm worm)
+        {
+            if (!Exists(worm))
+            {
+                throw new ArgumentException(
+                    "No such worm in current world state");
+            }
+
+            _worms.Remove(worm);
+        }
+
+        public virtual void Put(Food food, Position position)
+        {
+            if (_food.Contains(food))
+            {
+                throw new ArgumentException(
+                    "This food already exists in current world state");
+            }
+
+            if (Get(position) != Tile.Empty)
+            {
+                throw new ArgumentException(
+                    $"Cannot put food to position {position} - it is not empty");
+            }
+
+            _food.Add(food);
+        }
+
+        public virtual void Remove(Food food)
+        {
+            if (!Exists(food))
+            {
+                throw new ArgumentException(
+                    "No such food in current world state");
+            }
+
+            _food.Remove(food);
+        }
+
+        public virtual Tile Get(Position position)
+        {
+            if (_worms.Any(worm => worm.Position == position))
+            {
+                return Tile.Worm;
+            }
+
+            if (_food.Any(food => food.Position == position))
+            {
+                return Tile.Food;
+            }
+
+            return Tile.Empty;
+        }
+
+        public Worm GetWorm(string name)
+        {
+            return _worms.Find(worm => worm.Name == name);
+        }
+
+        public virtual Worm GetWorm(Position position)
+        {
+            return _worms.Find(worm => worm.Position == position);
+        }
+
+        public virtual Food GetFood(Position position)
+        {
+            return _food.Find(food => food.Position == position);
+        }
+
+        protected bool Exists(Worm worm)
+        {
+            return _worms.Contains(worm);
+        }
+
+        protected bool Exists(Food food)
+        {
+            return _food.Contains(food);
         }
     }
 }
