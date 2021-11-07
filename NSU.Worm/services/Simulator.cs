@@ -1,37 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace NSU.Worm
 {
-    public class Simulator
+    public class Simulator : ISimulator
     {
-        private readonly IMutableWorldState _worldState;
+        private const int DefaultIterations = 100;
 
-        private readonly WormBehaviourProvider _wormBehaviourProvider;
-
-        private readonly FoodGenerator _foodGenerator;
-
-        private readonly NameGenerator _nameGenerator;
+        private readonly IWormBehaviourProvider _wormBehaviourProvider;
+        private readonly IFoodGenerator _foodGenerator;
+        private readonly INameGenerator _nameGenerator;
 
         private readonly Logger _logger;
 
+        private readonly IMutableWorldState _worldState;
         private long _iteration;
 
-        public Simulator(List<KeyValuePair<Worm, IWormBehaviour>> worms)
+        public Simulator(IWormBehaviourProvider wormBehaviourProvider, IFoodGenerator foodGenerator,
+            INameGenerator nameGenerator)
         {
+            _wormBehaviourProvider = wormBehaviourProvider;
+            _foodGenerator = foodGenerator;
+            _nameGenerator = nameGenerator;
+
             _worldState = new WorldState();
-            _wormBehaviourProvider = new WormBehaviourProvider();
-            _foodGenerator = new FoodGenerator();
-            _nameGenerator = new NameGenerator();
             _logger = new Logger(true, true);
 
-            foreach (var (worm, behaviour) in worms)
-            {
-                AddWorm(worm, behaviour);
-            }
-            
+            InitDefaultWorms();
+
             _iteration = 0;
+        }
+
+        public void Start()
+        {
+            Start(DefaultIterations);
         }
 
         public void Start(int iterations)
@@ -130,13 +132,13 @@ namespace NSU.Worm
             }
 
             worm.Life -= 10;
-            
+
             var childWorm = new Worm(_nameGenerator.NextName(), 10, childPosition);
             var childBehaviour = _wormBehaviourProvider.GetBehaviour(worm).CopyForWorm(childWorm);
 
             AddWorm(childWorm, childBehaviour);
         }
-        
+
         private void AddWorm(Worm worm, IWormBehaviour behaviour)
         {
             _wormBehaviourProvider.RegisterBehaviour(worm, behaviour);
@@ -156,6 +158,18 @@ namespace NSU.Worm
             stringBuilder.AppendLine(_worldState.StateToString());
 
             _logger.log(stringBuilder.ToString());
+        }
+
+        private void InitDefaultWorms()
+        {
+            var worm1 = new Worm("Sasha", 10, 2, 0);
+            var behaviour1 = new CirclingWormBehaviour(worm1, worm1.Position);
+
+            var worm2 = new Worm("Zhenya", 10, -2, 0);
+            var behaviour2 = new CirclingWormBehaviour(worm2, worm2.Position);
+
+            AddWorm(worm1, behaviour1);
+            AddWorm(worm2, behaviour2);
         }
     }
 }

@@ -1,27 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace NSU.Worm
 {
     class Program
     {
-        private const int Iterations = 100;
-
         public static void Main(string[] args)
         {
-            var worm1 = new Worm("Sasha", 10, 2, 0);
-            var behaviour1 = new CirclingWormBehaviour(worm1, worm1.Position);
+            CreateHostBuilder(args).Build().Run();
+        }
 
-            var worm2 = new Worm("Zhenya", 10, -2, 0);
-            var behaviour2 = new CirclingWormBehaviour(worm2, worm2.Position);
-
-            var worms = new List<KeyValuePair<Worm, IWormBehaviour>>
-            {
-                new(worm1, behaviour1),
-                new(worm2, behaviour2)
-            };
-
-            var simulator = new Simulator(worms);
-            simulator.Start(Iterations);
+        private static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureServices((_, services) =>
+                {
+                    services.AddHostedService<SimulatorHostedService>();
+                    services.AddSingleton<IFoodGenerator, FoodGenerator>();
+                    services.AddSingleton<INameGenerator, NameGenerator>();
+                    services.AddSingleton<IWormBehaviourProvider, WormBehaviourProvider>();
+                    services.AddSingleton<ISimulator, Simulator>();
+                });
         }
     }
 }
