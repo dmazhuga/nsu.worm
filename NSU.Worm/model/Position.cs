@@ -11,9 +11,13 @@ namespace NSU.Worm
             Y = y;
         }
 
-        public int X { get; }
+        public Position()
+        {
+        }
 
-        public int Y { get; }
+        public int X { get; set; }
+
+        public int Y { get; set; }
 
         public Position Next(Direction direction)
         {

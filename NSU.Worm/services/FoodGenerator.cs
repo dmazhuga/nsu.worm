@@ -11,12 +11,12 @@ namespace NSU.Worm
             _random = new Random();
         }
 
-        public Food GenerateFood()
+        public Food GenerateFood(int freshness)
         {
             var x = _random.NextNormal();
             var y = _random.NextNormal();
             
-            return new Food(x, y);
+            return new Food(x, y, freshness);
         }
     }
 }

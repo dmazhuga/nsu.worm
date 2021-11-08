@@ -1,29 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace NSU.Worm
 {
     public class Simulator : ISimulator
     {
-        private const int DefaultIterations = 100;
-
         private readonly IWormBehaviourProvider _wormBehaviourProvider;
         private readonly IFoodGenerator _foodGenerator;
         private readonly INameGenerator _nameGenerator;
 
+        private readonly SimulatorOptions _options;
         private readonly ILogger<ISimulator> _logger;
 
         private readonly IMutableWorldState _worldState;
         private long _iteration;
 
         public Simulator(IWormBehaviourProvider wormBehaviourProvider, IFoodGenerator foodGenerator,
-            INameGenerator nameGenerator, ILogger<ISimulator> logger)
+            INameGenerator nameGenerator, ILogger<ISimulator> logger, IOptions<SimulatorOptions> options)
         {
             _wormBehaviourProvider = wormBehaviourProvider;
             _foodGenerator = foodGenerator;
             _nameGenerator = nameGenerator;
             _logger = logger;
+
+            _options = options.Value;
+
+            _nameGenerator.NamePool = new List<string>(_options.NamePool);
 
             _worldState = new WorldState();
 
@@ -34,7 +39,7 @@ namespace NSU.Worm
 
         public void Start()
         {
-            Start(DefaultIterations);
+            Start(_options.Iterations);
         }
 
         public void Start(int iterations)
@@ -54,22 +59,22 @@ namespace NSU.Worm
             {
                 food.Freshness--;
 
-                if (food.Freshness <= 0)
+                if (food.Freshness <= _options.FoodFreshnessBorderline)
                 {
                     _worldState.Remove(food);
                 }
             }
 
-            var newFood = _foodGenerator.GenerateFood();
+            var newFood = _foodGenerator.GenerateFood(_options.FoodFreshnessStart);
 
             while (_worldState.Get(newFood.Position) == Tile.Food)
             {
-                newFood = _foodGenerator.GenerateFood();
+                newFood = _foodGenerator.GenerateFood(_options.FoodFreshnessStart);
             }
 
             if (_worldState.Get(newFood.Position) == Tile.Worm)
             {
-                _worldState.GetWorm(newFood.Position).Life += 10;
+                _worldState.GetWorm(newFood.Position).Life += _options.FoodLifeGain;
             }
             else
             {
@@ -80,7 +85,7 @@ namespace NSU.Worm
             {
                 worm.Life--;
 
-                if (worm.Life <= 0)
+                if (worm.Life <= _options.WormLifeBorderline)
                 {
                     _worldState.Remove(worm);
                     continue;
@@ -114,7 +119,7 @@ namespace NSU.Worm
             if (_worldState.Get(newPosition) == Tile.Food)
             {
                 _worldState.Remove(_worldState.GetFood(newPosition));
-                worm.Life += 10;
+                worm.Life += _options.FoodLifeGain;
             }
 
             if (_worldState.Get(newPosition) != Tile.Worm)
@@ -127,14 +132,14 @@ namespace NSU.Worm
         {
             var childPosition = worm.Position.Next(direction);
 
-            if (worm.Life <= 10 || _worldState.Get(childPosition) != Tile.Empty)
+            if (worm.Life <= _options.ReproductionLifeRequirement || _worldState.Get(childPosition) != Tile.Empty)
             {
                 return;
             }
 
-            worm.Life -= 10;
+            worm.Life -= _options.ReproductionLifeCost;
 
-            var childWorm = new Worm(_nameGenerator.NextName(), 10, childPosition);
+            var childWorm = new Worm(_nameGenerator.NextName(), _options.WormLifeStart, childPosition);
             var childBehaviour = _wormBehaviourProvider.GetBehaviour(worm).CopyForWorm(childWorm);
 
             AddWorm(childWorm, childBehaviour);
@@ -163,14 +168,14 @@ namespace NSU.Worm
 
         private void InitDefaultWorms()
         {
-            var worm1 = new Worm("Sasha", 10, 2, 0);
-            var behaviour1 = new CirclingWormBehaviour(worm1, worm1.Position);
+            var defaultWorms = _options.StartWorms;
 
-            var worm2 = new Worm("Zhenya", 10, -2, 0);
-            var behaviour2 = new CirclingWormBehaviour(worm2, worm2.Position);
-
-            AddWorm(worm1, behaviour1);
-            AddWorm(worm2, behaviour2);
+            foreach (var worm in defaultWorms)
+            {
+                // TODO: возможность конфигурации поведения
+                var behaviour = new CirclingWormBehaviour(worm, worm.Position);
+                AddWorm(worm, behaviour);
+            }
         }
     }
 }

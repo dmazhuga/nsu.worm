@@ -2,6 +2,6 @@
 {
     public interface IFoodGenerator
     {
-        public Food GenerateFood();
+        public Food GenerateFood(int freshness);
     }
 }

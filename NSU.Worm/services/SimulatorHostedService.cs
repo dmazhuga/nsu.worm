@@ -1,19 +1,24 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace NSU.Worm
 {
     public class SimulatorHostedService : IHostedService
     {
-        private IHostApplicationLifetime _appLifetime;
+        private readonly IHostApplicationLifetime _appLifetime;
+        private readonly ILogger<SimulatorHostedService> _logger;
 
-        private ISimulator _simulator;
+        private readonly ISimulator _simulator;
 
-        public SimulatorHostedService(ISimulator simulator, IHostApplicationLifetime appLifetime)
+        public SimulatorHostedService(ISimulator simulator, IHostApplicationLifetime appLifetime,
+            ILogger<SimulatorHostedService> logger)
         {
             _simulator = simulator;
             _appLifetime = appLifetime;
+            _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -25,13 +30,23 @@ namespace NSU.Worm
         private void RunAsync()
         {
             Thread.Sleep(250);
-            _simulator.Start();
-            _appLifetime.StopApplication();
+            try
+            {
+                _simulator.Start();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Simulation stopped with exception: ${ex}", ex);
+            }
+            finally
+            {
+                _appLifetime.StopApplication();
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;  
+            return Task.CompletedTask;
         }
     }
 }

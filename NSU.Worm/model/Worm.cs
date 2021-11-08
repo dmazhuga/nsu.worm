@@ -16,10 +16,14 @@
             Position = new Position(xPosition, yPosition);
         }
 
+        public Worm()
+        {
+        }
+
         /// <summary>
         /// Ожидается, что имя червяка будет уникальным в мире
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
         
         public int Life { get; set; }
 
