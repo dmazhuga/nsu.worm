@@ -6,13 +6,14 @@ namespace NSU.Worm
 {
     public class SimulatorHostedService : IHostedService
     {
-        private bool _running = true;
+        private IHostApplicationLifetime _appLifetime;
 
         private ISimulator _simulator;
 
-        public SimulatorHostedService(ISimulator simulator)
+        public SimulatorHostedService(ISimulator simulator, IHostApplicationLifetime appLifetime)
         {
             _simulator = simulator;
+            _appLifetime = appLifetime;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -25,11 +26,11 @@ namespace NSU.Worm
         {
             Thread.Sleep(250);
             _simulator.Start();
+            _appLifetime.StopApplication();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _running = false;
             return Task.CompletedTask;  
         }
     }
