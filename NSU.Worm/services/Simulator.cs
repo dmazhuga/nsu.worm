@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace NSU.Worm
 {
@@ -11,20 +12,20 @@ namespace NSU.Worm
         private readonly IFoodGenerator _foodGenerator;
         private readonly INameGenerator _nameGenerator;
 
-        private readonly Logger _logger;
+        private readonly ILogger<ISimulator> _logger;
 
         private readonly IMutableWorldState _worldState;
         private long _iteration;
 
         public Simulator(IWormBehaviourProvider wormBehaviourProvider, IFoodGenerator foodGenerator,
-            INameGenerator nameGenerator)
+            INameGenerator nameGenerator, ILogger<ISimulator> logger)
         {
             _wormBehaviourProvider = wormBehaviourProvider;
             _foodGenerator = foodGenerator;
             _nameGenerator = nameGenerator;
+            _logger = logger;
 
             _worldState = new WorldState();
-            _logger = new Logger(true, true);
 
             InitDefaultWorms();
 
@@ -155,9 +156,9 @@ namespace NSU.Worm
             }
 
             stringBuilder.Append($"Iteration: {_iteration}\t");
-            stringBuilder.AppendLine(_worldState.StateToString());
+            stringBuilder.Append(_worldState.StateToString());
 
-            _logger.log(stringBuilder.ToString());
+            _logger.LogInformation(stringBuilder.ToString());
         }
 
         private void InitDefaultWorms()

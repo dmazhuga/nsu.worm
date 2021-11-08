@@ -17,8 +17,14 @@ namespace NSU.Worm
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            Task.Run(() => _simulator.Start());
+            Task.Run(RunAsync, cancellationToken);
             return Task.CompletedTask;
+        }
+
+        private void RunAsync()
+        {
+            Thread.Sleep(250);
+            _simulator.Start();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

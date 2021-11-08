@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace NSU.Worm
 {
@@ -20,6 +22,11 @@ namespace NSU.Worm
                     services.AddSingleton<INameGenerator, NameGenerator>();
                     services.AddSingleton<IWormBehaviourProvider, WormBehaviourProvider>();
                     services.AddSingleton<ISimulator, Simulator>();
+                })
+                .ConfigureLogging(context =>
+                {
+                    context.ClearProviders();
+                    context.AddNLog();
                 });
         }
     }
