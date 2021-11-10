@@ -21,6 +21,7 @@ namespace NSU.Worm
                     services.AddSingleton<IFoodGenerator, FoodGenerator>();
                     services.AddSingleton<INameGenerator, NameGenerator>();
                     services.AddSingleton<IWormBehaviourProvider, WormBehaviourProvider>();
+                    services.AddSingleton<IMutableWorldState, WorldState>();
                     services.AddSingleton<ISimulator, Simulator>();
 
                     services.Configure<SimulatorOptions>(context

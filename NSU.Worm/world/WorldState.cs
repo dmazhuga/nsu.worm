@@ -24,7 +24,7 @@ namespace NSU.Worm
 
             foreach (var worm in wormList)
             {
-                Put(worm, worm.Position);
+                Put(worm);
             }
         }
 
@@ -35,12 +35,12 @@ namespace NSU.Worm
 
             foreach (var worm in wormList)
             {
-                Put(worm, worm.Position);
+                Put(worm);
             }
 
             foreach (var food in foodList)
             {
-                Put(food, food.Position);
+                Put(food);
             }
         }
 
@@ -50,19 +50,29 @@ namespace NSU.Worm
 
         public virtual void Move(Worm worm, Position position)
         {
+            if (worm.Position == position)
+            {
+                return;
+            }
+
             if (!Exists(worm))
             {
                 throw new ArgumentException(
                     "No such worm in current world state");
             }
 
-            if (Get(position) == Tile.Worm)
+            if (Get(position) != Tile.Empty)
             {
                 throw new ArgumentException(
-                    $"Cannot move worm to position {position} - it is used by other worm");
+                    $"Cannot move worm to position {position} - it is not empty");
             }
 
             worm.Position = position;
+        }
+
+        public virtual void Put(Worm worm)
+        {
+            Put(worm, worm.Position);
         }
 
         public virtual void Put(Worm worm, Position position)
@@ -85,6 +95,7 @@ namespace NSU.Worm
                     $"Cannot put worm to position {position} - it is not empty");
             }
 
+            worm.Position = position;
             _worms.Add(worm);
         }
 
@@ -97,6 +108,11 @@ namespace NSU.Worm
             }
 
             _worms.Remove(worm);
+        }
+
+        public virtual void Put(Food food)
+        {
+            Put(food, food.Position);
         }
 
         public virtual void Put(Food food, Position position)
@@ -113,6 +129,7 @@ namespace NSU.Worm
                     $"Cannot put food to position {position} - it is not empty");
             }
 
+            food.Position = position;
             _food.Add(food);
         }
 

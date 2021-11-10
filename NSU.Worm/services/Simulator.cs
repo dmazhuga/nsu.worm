@@ -19,18 +19,21 @@ namespace NSU.Worm
         private long _iteration;
 
         public Simulator(IWormBehaviourProvider wormBehaviourProvider, IFoodGenerator foodGenerator,
-            INameGenerator nameGenerator, ILogger<ISimulator> logger, IOptions<SimulatorOptions> options)
+            INameGenerator nameGenerator, IMutableWorldState worldState, ILogger<ISimulator> logger,
+            IOptions<SimulatorOptions> options)
         {
             _wormBehaviourProvider = wormBehaviourProvider;
             _foodGenerator = foodGenerator;
             _nameGenerator = nameGenerator;
             _logger = logger;
+            _worldState = worldState;
 
             _options = options.Value;
 
-            _nameGenerator.NamePool = new List<string>(_options.NamePool);
-
-            _worldState = new WorldState();
+            if (_options.NamePool.Count != 0)
+            {
+                _nameGenerator.NamePool = new List<string>(_options.NamePool);
+            }
 
             InitDefaultWorms();
 
@@ -78,7 +81,7 @@ namespace NSU.Worm
             }
             else
             {
-                _worldState.Put(newFood, newFood.Position);
+                _worldState.Put(newFood);
             }
 
             foreach (var worm in _worldState.Worms)
@@ -148,7 +151,7 @@ namespace NSU.Worm
         private void AddWorm(Worm worm, IWormBehaviour behaviour)
         {
             _wormBehaviourProvider.RegisterBehaviour(worm, behaviour);
-            _worldState.Put(worm, worm.Position);
+            _worldState.Put(worm);
         }
 
         private void LogState()

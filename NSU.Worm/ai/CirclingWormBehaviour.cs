@@ -8,6 +8,8 @@ namespace NSU.Worm
     /// </summary>
     public class CirclingWormBehaviour : IWormBehaviour
     {
+        private const int ReproductionLifeRequirement = 15;
+        
         private readonly Position _circleCenter;
 
         public CirclingWormBehaviour(Worm worm, Position circleCenter)
@@ -38,7 +40,7 @@ namespace NSU.Worm
             
             var circleRelativePosition = position.DirectionRelativeTo(_circleCenter);
 
-            if (life >= 15)
+            if (life >= ReproductionLifeRequirement)
             {
                 return circleRelativePosition switch
                 {
