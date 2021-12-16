@@ -23,5 +23,7 @@ namespace NSU.Worm
         public List<Worm> StartWorms { get; set; } = new();
 
         public List<string> NamePool { get; set; } = new();
+
+        public string FoodPatternName { get; set; } = "";
     }
 }

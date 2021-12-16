@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NSU.Worm\NSU.Worm.csproj" />
+      <ProjectReference Include="..\NSU.Worm.Service\NSU.Worm.Service.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using NSU.Worm.Data;
 
 namespace NSU.Worm
 {
@@ -17,8 +19,13 @@ namespace NSU.Worm
             return Host.CreateDefaultBuilder(args)
                 .ConfigureServices((context, services) =>
                 {
+                    services.AddDbContextFactory<EnvironmentContext>(options => 
+                        options.UseNpgsql("name=ConnectionStrings:EnvironmentDatabase"));
+                    
                     services.AddHostedService<SimulatorHostedService>();
-                    services.AddSingleton<IFoodGenerator, FoodGenerator>();
+                    
+                    //services.AddSingleton<IFoodGenerator, RandomFoodGenerator>();
+                    services.AddSingleton<IFoodGenerator, PatternFoodGenerator>();
                     services.AddSingleton<INameGenerator, NameGenerator>();
                     services.AddSingleton<IWormBehaviourProvider, WormBehaviourProvider>();
                     services.AddSingleton<IMutableWorldState, WorldState>();
