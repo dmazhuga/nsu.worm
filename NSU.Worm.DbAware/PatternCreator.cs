@@ -6,9 +6,9 @@ namespace NSU.Worm.CreateFoodPattern
 {
     public class PatternCreator
     {
-        private RandomFoodGenerator _randomFoodGenerator;
+        private IFoodGenerator _randomFoodGenerator;
 
-        public PatternCreator(RandomFoodGenerator randomFoodGenerator)
+        public PatternCreator(IFoodGenerator randomFoodGenerator)
         {
             _randomFoodGenerator = randomFoodGenerator;
         }
